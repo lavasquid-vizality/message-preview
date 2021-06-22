@@ -80,7 +80,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
         delete embed.id;
 
         if (message.fetchedMessage) {
-          embed.color = '#ffffff';
+          embed.color = `rgb(${embed.color & 0xFF}, ${(embed.color & 0xFF00) >> 8}, ${(embed.color & 0xFF0000) >> 16})`;
           embed.rawTitle = embed.title;
           delete embed.title;
           if (!message.fetchedMessageFixed) {
@@ -92,8 +92,10 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
             }
             message.fetchedMessageFixed = true;
           }
-          if (embed.rawTitle && !embed.rawTitle.includes('(Embed) - ')) embed.rawTitle = `(Embed) - ${embed.rawTitle}`;
-          if (typeof embed.footer.text[0] !== 'object') embed.footer.text = parse(`<#${message.channel_id}>${` ${embed.footer?.text}` ?? ''}`);
+        }
+        if (embed.rawTitle && !embed.rawTitle.includes('(Embed) - ')) embed.rawTitle = `(Embed) - ${embed.rawTitle}`;
+        if (typeof embed.footer?.text[0] !== 'object') {
+          embed.footer = (embed.footer?.text) ? { text: parse(`<#${message.channel_id}> ${embed.footer.text}`) } : { text: parse(`<#${message.channel_id}>`) };
         }
       } else if (messageEmbed.type === 'gifv') {
         Object.assign(embed, messageEmbed);
@@ -102,7 +104,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
     }
   }
 
-  if (typeof embed.timestamp === 'string') embed.timestamp = new Timestamp(embed.timestamp);
+  if (typeof embed.timestamp !== 'object') embed.timestamp = new Timestamp(embed.timestamp);
 
   return <MessageAccessories message={new MessageTemplate({ embeds: [ embed ] })} channel={getChannel(channelId)} gifAutoPlay={true} inlineAttachmentMedia={true} inlineEmbedMedia={true} />;
 });

@@ -7,6 +7,7 @@ let lastFetch = 0;
 const { get } = getModule('getAPIBaseURL');
 const { Endpoints } = Constants;
 const { getMessage } = getModule(m => m._dispatchToken && m.getMessage);
+const MessageTemplate = getModule(m => m.prototype?.isEdited);
 
 // queue based on https://stackoverflow.com/questions/53540348/js-async-await-tasks-queue
 const Queue = (() => {
@@ -26,13 +27,11 @@ const Queue = (() => {
           },
           retries: 2
         });
-        if (debug) console.log(`Fetched - ${channelId} / ${messageId} - ${new Date()}`);
         lastFetch = Date.now();
-        const message = data.body[0];
-        if (!message) return;
+        if (debug) console.log(`Fetched - ${channelId} / ${messageId} - ${new Date()}`);
+        if (!data.body[0]) return;
+        const message = new MessageTemplate(data.body[0]);
         message.fetchedMessage = true;
-        message.isEdited = () => false;
-        message.hasFlag = () => false;
         return message;
       } catch (e) { console.log(e); return; }
     }

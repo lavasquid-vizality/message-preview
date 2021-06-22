@@ -14,21 +14,16 @@ export default class extends Plugin {
 
   patch () {
     patch(getModule(m => m.type?.displayName === 'MessageContent'), 'type', (args, res) => {
-      if (args[0].className === repliedTextContent) return;
-      try {
-        for (const content of args[0].content) {
-          if (content.type?.displayName === 'MaskedLink') {
-            const { title } = content.props;
-            if (!title?.includes('discord') || !title?.includes('/channels/')) return;
-            const [ , guildId, channelId, messageId ] = title.match(/https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/);
+      if (args[0].className === repliedTextContent || typeof args[0].content !== 'object') return res;
 
-            res.props.children[0].push(<CustomEmbed guildId={guildId} channelId={channelId} messageId={messageId} />);
-          }
-        }
-      } catch (e) {
-        console.log(e);
-        console.log(args);
-      }
+      const content = args[0].content.find(x => x.type?.displayName === 'MaskedLink');
+      if (!content) return res;
+
+      const { title } = content.props;
+      if (!title?.includes('discord') || !title?.includes('/channels/')) return res;
+      const [ , guildId, channelId, messageId ] = title.match(/https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/);
+
+      res.props.children[0].push(<CustomEmbed guildId={guildId} channelId={channelId} messageId={messageId} />);
 
       return res;
     });
