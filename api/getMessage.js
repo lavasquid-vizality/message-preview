@@ -1,13 +1,14 @@
 import { Constants } from '@vizality/discord/util';
 import { getModule } from '@vizality/webpack';
 
-const debug = false;
-let lastFetch = 0;
-
 const { get } = getModule('getAPIBaseURL');
 const { Endpoints } = Constants;
 const { getMessage } = getModule(m => m._dispatchToken && m.getMessage);
-const MessageTemplate = getModule(m => m.prototype?.isEdited);
+
+const Message = getModule(m => m.prototype?.isEdited);
+
+const debug = false;
+let lastFetch = 0;
 
 // queue based on https://stackoverflow.com/questions/53540348/js-async-await-tasks-queue
 const Queue = (() => {
@@ -30,7 +31,7 @@ const Queue = (() => {
         lastFetch = Date.now();
         if (debug) console.log(`Fetched - ${channelId} / ${messageId} - ${new Date()}`);
         if (!data.body[0]) return;
-        const message = new MessageTemplate(data.body[0]);
+        const message = new Message(data.body[0]);
         message.fetchedMessage = true;
         return message;
       } catch (e) { console.log(e); return; }

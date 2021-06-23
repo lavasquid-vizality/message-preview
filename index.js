@@ -20,10 +20,11 @@ export default class extends Plugin {
       if (!content) return res;
 
       const { title } = content.props;
-      if (!title?.includes('discord') || !title?.includes('/channels/')) return res;
-      const [ , guildId, channelId, messageId ] = title.match(/https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/);
-
-      res.props.children[0].push(<CustomEmbed guildId={guildId} channelId={channelId} messageId={messageId} />);
+      const titleMatch = title.match(/https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/channels\/(\d{17,19}|@me)\/(\d{17,19})\/(\d{17,19})/);
+      if (titleMatch) {
+        const [ , guildId, channelId, messageId ] = titleMatch;
+        res.props.children[0].push(<CustomEmbed guildId={guildId} channelId={channelId} messageId={messageId} />);
+      }
 
       return res;
     });
