@@ -13,6 +13,14 @@ const Message = getModule(m => m.prototype?.isEdited);
 const Timestamp = getModule(m => m.prototype?.toDate && m.prototype?.month);
 const { MessageAccessories } = getModule('MessageAccessories');
 
+const changeDelete = (object, changeFrom, changeTo) => {
+  if (object && object[changeFrom]) {
+    Object.defineProperty(object, changeTo,
+      Object.getOwnPropertyDescriptor(object, changeFrom));
+    delete object[changeFrom];
+  }
+};
+
 export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
   const [ loading, setLoading ] = useState(true);
   const [ message, setMessage ] = useState('');
@@ -72,6 +80,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
       }
     }
   }
+
   for (const messageEmbed of message.embeds) {
     const { type } = messageEmbed;
 
@@ -79,8 +88,14 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
     delete embed.id;
 
     switch (type) {
+      case 'image': {
+        changeDelete(embed, 'thumbnail', 'image');
+        changeDelete(embed.image, 'proxy_url', 'proxyURL');
+        break;
+      }
       case 'gifv': {
         embed.type = 'video';
+        changeDelete(embed.video, 'proxy_url', 'proxyURL');
         break;
       }
       case 'rich': {
@@ -89,14 +104,11 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
 
         if (message.fetchedMessage) {
           embed.color = `#${embed.color.toString(16)}`;
-          embed.rawTitle = embed.title;
-          delete embed.title;
+          changeDelete(embed, 'title', 'rawTitle');
           if (!message.fetchedMessageFixed) {
             for (const field of embed.fields) {
-              field.rawName = field.name;
-              field.rawValue = field.value;
-              delete field.name;
-              delete field.value;
+              changeDelete(field, 'name', 'rawName');
+              changeDelete(field, 'value', 'rawValue');
             }
             message.fetchedMessageFixed = true;
           }
