@@ -14,9 +14,9 @@ export default class extends Plugin {
 
   patch () {
     patch(getModule(m => m.type?.displayName === 'MessageContent'), 'type', (args, res) => {
-      if (args[0].className === repliedTextContent || typeof args[0].content !== 'object') return res;
+      if (args[0].className === repliedTextContent) return res;
 
-      const content = args[0].content.find(x => x.type?.displayName === 'MaskedLink');
+      const content = args[0].content.find ? args[0].content.find(x => x.type?.displayName === 'MaskedLink') : null;
       if (!content) return res;
 
       const { title } = content.props;
