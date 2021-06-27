@@ -26,23 +26,35 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
   const [ message, setMessage ] = useState('');
 
   useEffect(() => {
-    (async () => {
-      setMessage(await getMessage(channelId, messageId));
-      setLoading(false);
-    })();
+    if (getChannel(channelId)) {
+      (async () => {
+        setMessage(await getMessage(channelId, messageId));
+        setLoading(false);
+      })();
+    }
   }, []);
 
+  if (!getChannel(channelId)) return;
   if (loading) return <MessageAccessories message={new Message({ embeds: [ { rawTitle: 'Loading...' } ] })} channel={getChannel(channelId)} />;
   if (Object.keys(message).length === 0) return <MessageAccessories message={new Message({ embeds: [ { rawTitle: 'Error Fetching Message!' } ] })} channel={getChannel(channelId)} />;
+
+  const nameMention = parse(`<@${message.author.id}>`);
+  nameMention[0].props.channelId = message.channel_id;
+
+  const messageContent = parse(message.content);
+  for (const content of messageContent) {
+    if (content.props?.className === 'mention') {
+      content.props.channelId = message.channel_id;
+    }
+  }
 
   let embed = {
     color: getColor(guildId, message.author.id),
     author: {
-      name: message.author.username,
-      iconProxyURL: user.getAvatarUrl(message.author.id),
-      url: `https://discord.com/users/${message.author.id}`
+      name: nameMention,
+      iconProxyURL: user.getAvatarUrl(message.author.id)
     },
-    rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, parse(message.content)),
+    rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, messageContent),
     footer: {
       text: parse(`<#${message.channel_id}>`)
     },
