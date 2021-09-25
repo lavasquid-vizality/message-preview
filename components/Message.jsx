@@ -78,7 +78,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
     color: getColor(guildId, message.author.id),
     author: {
       name: parse(`<@${message.author.id}>`, true, { channelId }),
-      iconProxyURL: user.getAvatarUrl(message.author.id, guildId, true)
+      iconProxyURL: user.getAvatarUrl(message.author.id, guildId, 24, true)
     },
     rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, parse(message.content, true, { channelId })),
     fields: [],
