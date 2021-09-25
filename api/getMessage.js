@@ -1,14 +1,15 @@
-import { Constants } from '@vizality/discord/util';
+import { Constants } from '@vizality/discord/constants';
 import { getModule } from '@vizality/webpack';
-
-const { get } = getModule('getAPIBaseURL');
-const { Endpoints } = Constants;
-const { getMessage } = getModule(m => m._dispatchToken && m.getMessage);
+import { sleep } from '@vizality/util/time';
 
 const Message = getModule(m => m.prototype?.isEdited);
 
+const { get } = getModule('getAPIBaseURL');
+const { getMessage } = getModule(m => m._dispatchToken && m.getMessage);
+
 const debug = false;
 let lastFetch = 0;
+const cachedMessages = new Map();
 
 // queue based on https://stackoverflow.com/questions/53540348/js-async-await-tasks-queue
 const Queue = (() => {
@@ -18,10 +19,10 @@ const Queue = (() => {
     try {
       await pending;
     } finally {
-      if (lastFetch > Date.now() - 2500) await new Promise(r => setTimeout(r, 2500));
+      if (lastFetch > Date.now() - 5000) await sleep(5000);
       try {
         const data = await get({
-          url: Endpoints.MESSAGES(channelId),
+          url: Constants.Endpoints.MESSAGES(channelId),
           query: {
             limit: 1,
             around: messageId
@@ -41,12 +42,16 @@ const Queue = (() => {
   return (channelId, messageId) => (pending = run(channelId, messageId));
 })();
 
-export default async (channelId, messageId) => {
-  const message = getMessage(channelId, messageId) ?? {};
+export default async (channelId, messageId, updateMessage) => {
+  if (!channelId && !messageId) return {};
 
-  if (Object.keys(message).length === 0 && channelId && messageId) {
-    return Queue(channelId, messageId);
-  }
+  const oldMap = cachedMessages.get(channelId);
+  if (oldMap?.has(messageId) && updateMessage !== 'update') return cachedMessages.get(channelId).get(messageId);
+
+  const message = getMessage(channelId, messageId) ?? Queue(channelId, messageId);
+
+  const newMap = oldMap ? [ ...oldMap, [ messageId, message ] ] : [ [ messageId, message ] ];
+  cachedMessages.set(channelId, new Map(newMap));
 
   return message;
 };

@@ -1,7 +1,7 @@
 {
   "name": "Message Preview",
   "description": "Shows a message preview for a discord message link.",
-  "version": "1.2.2",
+  "version": "2.0.0",
   "author": "LavaSquid",
   "license": "MIT"
 }
