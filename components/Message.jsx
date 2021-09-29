@@ -3,6 +3,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { user } from '@vizality/discord';
 import { Constants } from '@vizality/discord/constants';
 import { getModule, FluxDispatcher } from '@vizality/webpack';
+import { findInReactTree } from '@vizality/util/react';
 
 import getColor from '../api/getColor';
 import getMessage from '../api/getMessage';
@@ -50,7 +51,7 @@ const CustomMessage = memo(({ channelId, embed }) => {
   return !equal.includes(false);
 });
 
-export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
+export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
   const [ update, setUpdate ] = useState(true);
   const [ message, setMessage ] = useState('');
 
@@ -72,15 +73,19 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId }) => {
   }, [ update ]);
 
   if (update) return <CustomMessage channelId={channelId} embed={{ rawTitle: 'Loading...' }} />;
+  if (!message) return null;
   if (Object.keys(message).length === 0) return <CustomMessage channelId={channelId} embed={{ rawTitle: 'Error Fetching Message!' }} />;
 
+  const parsedMessageContent = parse(message.content, true, { channelId });
+  const maskedLink = findInReactTree(parsedMessageContent, m => m.type?.displayName === 'MaskedLink');
+  if (maskedLink) maskedLink.props.count = count + 1;
   const embed = {
     color: getColor(guildId, message.author.id),
     author: {
       name: parse(`<@${message.author.id}>`, true, { channelId }),
       iconProxyURL: user.getAvatarUrl(message.author.id, guildId, 24, true)
     },
-    rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, parse(message.content, true, { channelId })),
+    rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, parsedMessageContent),
     fields: [],
     footer: {
       text: parse(`<#${channelId}>`, true, { channelId })
