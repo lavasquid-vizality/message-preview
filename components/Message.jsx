@@ -41,8 +41,13 @@ const videoEmbed = video => {
   return newVideoEmbed;
 };
 
-const CustomMessage = memo(({ channelId, embed }) => {
-  return <MessageAccessories message={new Message({ embeds: [ embed ] })} channel={getChannel(channelId)} gifAutoPlay={true} inlineAttachmentMedia={true} inlineEmbedMedia={true} />;
+const CustomMessage = memo(({ channelId, embed, attachment }) => {
+  const message = {
+    attachments: [ attachment ].filter(attachment => attachment),
+    embeds: [ embed ].filter(embed => embed)
+  };
+
+  return <MessageAccessories message={new Message(message)} channel={getChannel(channelId)} gifAutoPlay={true} inlineAttachmentMedia={true} inlineEmbedMedia={true} />;
 }, (prevProps, nextProps) => {
   const equal = [];
   for (const [ key, value ] of Object.entries(prevProps.embed)) {
@@ -94,7 +99,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
   };
 
   for (const attachment of message.attachments) {
-    const type = attachment.content_type?.match(/image|video/)[0];
+    const type = attachment.content_type?.match(/image|video/)?.[0];
 
     switch (type) {
       case 'image': {
@@ -120,7 +125,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
           embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={{ image: cloneDeep(attachment) }} />, inline: false });
         } else if ((/\.mov$/i).test(attachment.filename)) {
           embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={videoEmbed(attachment)} />, inline: false });
-        }
+        } else embed.fields.push({ rawValue: <CustomMessage channelId={channelId} attachment={cloneDeep(attachment)} />, inline: false });
       }
     }
   }
