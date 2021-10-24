@@ -61,7 +61,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
   const [ message, setMessage ] = useState('');
 
   useEffect(() => {
-    const Update = (args) => {
+    const Update = args => {
       if (args.message.id !== messageId) return;
       setUpdate('update');
     };
@@ -137,7 +137,7 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
     switch (type) {
       case 'rich': {
         if (message.fetchedMessage) {
-          newEmbed.color = `#${newEmbed.color.toString(16)}`;
+          newEmbed.color = newEmbed.color ? `#${newEmbed.color.toString(16)}` : '';
           changeDelete(newEmbed, 'title', 'rawTitle');
           changeDelete(newEmbed, 'description', 'rawDescription');
           if (newEmbed.author) {
