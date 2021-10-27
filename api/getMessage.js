@@ -5,7 +5,7 @@ import { sleep } from '@vizality/util/time';
 const Message = getModule(m => m.prototype?.isEdited);
 
 const { get } = getModule('getAPIBaseURL');
-const { getMessage } = getModule(m => m._dispatchToken && m.getMessage);
+const { getMessage } = getModule(m => m.getMessage && m.getMessages);
 
 const debug = false;
 let lastFetch = 0;

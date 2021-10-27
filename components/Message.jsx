@@ -14,7 +14,7 @@ const Timestamp = getModule(m => m.prototype?.toDate && m.prototype?.month);
 const { MessageAccessories } = getModule(m => m.MessageAccessories);
 const StickerMessage = getModule(m => m.displayName === 'StickerMessage');
 
-const { getChannel } = getModule(m => m.getChannel);
+const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
 const { parse } = getModule('parse', 'defaultRules');
 
 const changeDelete = (object, changeFrom, changeTo) => {
