@@ -134,40 +134,38 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
     const { type } = messageEmbed;
     const newEmbed = cloneDeep(messageEmbed);
 
+    if (message.fetchedMessage) {
+      newEmbed.color = newEmbed.color ? `#${newEmbed.color.toString(16)}` : '';
+      changeDelete(newEmbed, 'title', 'rawTitle');
+      changeDelete(newEmbed, 'description', 'rawDescription');
+      if (newEmbed.author) {
+        changeDelete(newEmbed.author, 'icon_url', 'iconURL');
+        changeDelete(newEmbed.author, 'proxy_icon_url', 'iconProxyURL');
+      }
+      if (newEmbed.fields) {
+        for (const field of newEmbed.fields) {
+          changeDelete(field, 'name', 'rawName');
+          changeDelete(field, 'value', 'rawValue');
+        }
+      }
+      if (newEmbed.footer) {
+        changeDelete(newEmbed.footer, 'icon_url', 'iconURL');
+        changeDelete(newEmbed.footer, 'proxy_icon_url', 'iconProxyURL');
+      }
+    }
+
     switch (type) {
       case 'rich': {
-        if (message.fetchedMessage) {
-          newEmbed.color = newEmbed.color ? `#${newEmbed.color.toString(16)}` : '';
-          changeDelete(newEmbed, 'title', 'rawTitle');
-          changeDelete(newEmbed, 'description', 'rawDescription');
-          if (newEmbed.author) {
-            changeDelete(newEmbed.author, 'icon_url', 'iconURL');
-            changeDelete(newEmbed.author, 'proxy_icon_url', 'iconProxyURL');
-          }
-          if (newEmbed.fields) {
-            for (const field of newEmbed.fields) {
-              changeDelete(field, 'name', 'rawName');
-              changeDelete(field, 'value', 'rawValue');
-            }
-          }
-          if (newEmbed.footer) {
-            changeDelete(newEmbed.footer, 'icon_url', 'iconURL');
-            changeDelete(newEmbed.footer, 'proxy_icon_url', 'iconProxyURL');
-          }
-        }
         if (typeof newEmbed.timestamp !== 'object' && typeof newEmbed.timestamp !== 'undefined') newEmbed.timestamp = new Timestamp(newEmbed.timestamp);
-        embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={newEmbed} />, inline: false });
         break;
       }
       case 'image': {
         changeDelete(newEmbed, 'thumbnail', 'image');
-        embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={newEmbed} />, inline: false });
         break;
       }
-      default: {
-        embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={newEmbed} />, inline: false });
-      }
     }
+
+    embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={newEmbed} />, inline: false });
   }
 
   for (const sticker of message.stickerItems) {
