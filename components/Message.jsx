@@ -1,7 +1,6 @@
 import { cloneDeep, isEqual } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
-import { user } from '@vizality/discord';
-import { Constants } from '@vizality/discord/constants';
+const { user, constants: { Constants, ActionTypes } } = require('@vizality/discord');
 import { getModule, FluxDispatcher } from '@vizality/webpack';
 import { findInReactTree } from '@vizality/util/react';
 
@@ -73,8 +72,8 @@ export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
       })();
     }
 
-    FluxDispatcher.subscribe(Constants.ActionTypes.MESSAGE_UPDATE, Update);
-    return () => FluxDispatcher.unsubscribe(Constants.ActionTypes.MESSAGE_UPDATE, Update);
+    FluxDispatcher.subscribe(ActionTypes.MESSAGE_UPDATE, Update);
+    return () => FluxDispatcher.unsubscribe(ActionTypes.MESSAGE_UPDATE, Update);
   }, [ update ]);
 
   if (update) return <CustomMessage channelId={channelId} embed={{ rawTitle: 'Loading...' }} />;
