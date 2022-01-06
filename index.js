@@ -5,14 +5,14 @@ import { Permissions } from '@vizality/discord/constants';
 import { getModule } from '@vizality/webpack';
 import { findInReactTree } from '@vizality/util/react';
 
-import { CustomEmbed } from './components/Message';
+import Message from './components/Message';
 
 const { can } = getModule(m => m._dispatchToken && m.can);
 const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
 
 const { repliedTextContent } = getModule('repliedTextContent');
 
-export default class extends Plugin {
+export default class MessagePreview extends Plugin {
   start () {
     this.patch();
   }
@@ -27,7 +27,7 @@ export default class extends Plugin {
       for (const contentMatch of contentMatches) {
         const [ , guildId, channelId, messageId ] = contentMatch;
         if (!can(Permissions.VIEW_CHANNEL, getChannel(channelId)) || messageId === message.id || count > 3) continue;
-        res.props.children[0].push(<CustomEmbed guildId={guildId} channelId={channelId} messageId={messageId} count={count} />);
+        res.props.children[0].push(<Message guildId={guildId} channelId={channelId} messageId={messageId} count={count} />);
       }
 
       return res;

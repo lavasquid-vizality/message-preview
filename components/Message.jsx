@@ -55,7 +55,7 @@ const CustomMessage = memo(({ channelId, embed, attachment }) => {
   return !equal.includes(false);
 });
 
-export const CustomEmbed = memo(({ guildId, channelId, messageId, count }) => {
+export default memo(({ guildId, channelId, messageId, count }) => {
   const [ update, setUpdate ] = useState(true);
   const [ message, setMessage ] = useState('');
 
