@@ -1,10 +1,10 @@
-import { Constants } from '@vizality/discord/constants';
 import { getModule } from '@vizality/webpack';
 import { sleep } from '@vizality/util/time';
 
 const Message = getModule(m => m.prototype?.isEdited);
 
-const { get } = getModule('getAPIBaseURL');
+const Constants = getModule(m => m.API_HOST);
+const { get } = getModule(m => m.getAPIBaseURL);
 const { getMessage } = getModule(m => m.getMessage && m.getMessages);
 
 const debug = false;
@@ -39,7 +39,7 @@ const Queue = (() => {
     }
   };
 
-  return (channelId, messageId) => (pending = run(channelId, messageId));
+  return (channelId, messageId) => pending = run(channelId, messageId);
 })();
 
 export default async (channelId, messageId, updateMessage) => {

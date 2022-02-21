@@ -1,6 +1,5 @@
 import { cloneDeep, isEqual } from 'lodash';
 import React, { memo, useState, useEffect } from 'react';
-const { user, constants: { Constants, ActionTypes } } = require('@vizality/discord');
 import { getModule, FluxDispatcher } from '@vizality/webpack';
 import { findInReactTree } from '@vizality/util/react';
 
@@ -13,8 +12,10 @@ const Timestamp = getModule(m => m.prototype?.toDate && m.prototype?.month);
 const { MessageAccessories } = getModule(m => m.MessageAccessories);
 const StickerMessage = getModule(m => m.displayName === 'StickerMessage');
 
+const Constants = getModule(m => m.API_HOST);
 const { getChannel } = getModule(m => m.getChannel && m.hasChannel);
-const { parse } = getModule('parse', 'defaultRules');
+const { parse } = getModule(m => m.parse && m.defaultRules);
+const { getUser } = getModule(m => m.getUser && m.getUsers);
 
 const changeDelete = (object, changeFrom, changeTo) => {
   if (object && object[changeFrom]) {
@@ -72,8 +73,8 @@ export default memo(({ guildId, channelId, messageId, count }) => {
       })();
     }
 
-    FluxDispatcher.subscribe(ActionTypes.MESSAGE_UPDATE, Update);
-    return () => FluxDispatcher.unsubscribe(ActionTypes.MESSAGE_UPDATE, Update);
+    FluxDispatcher.subscribe(Constants.ActionTypes.MESSAGE_UPDATE, Update);
+    return () => FluxDispatcher.unsubscribe(Constants.ActionTypes.MESSAGE_UPDATE, Update);
   }, [ update ]);
 
   if (update) return <CustomMessage channelId={channelId} embed={{ rawTitle: 'Loading...' }} />;
@@ -87,7 +88,7 @@ export default memo(({ guildId, channelId, messageId, count }) => {
     color: getColor(guildId, message.author.id),
     author: {
       name: parse(`<@${message.author.id}>`, true, { channelId }),
-      iconProxyURL: user.getAvatarUrl(message.author.id, guildId, 24, true)
+      iconProxyURL: getUser(message.author.id)?.getAvatarURL(guildId, 24, true)
     },
     rawDescription: getModule(m => m.displayName === 'renderMessageContent')({ message }, parsedMessageContent),
     fields: [],
@@ -120,7 +121,7 @@ export default memo(({ guildId, channelId, messageId, count }) => {
         break;
       }
       default: {
-        if (Constants.IMAGE_RE.test(attachment.filename)) {
+        if ((/\.(png|jpe?g|webp|gif)$/i).test(attachment.filename)) {
           embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={{ image: cloneDeep(attachment) }} />, inline: false });
         } else if ((/\.mov$/i).test(attachment.filename)) {
           embed.fields.push({ rawValue: <CustomMessage channelId={channelId} embed={videoEmbed(attachment)} />, inline: false });
