@@ -9,6 +9,7 @@ const { getMessage } = getModule(m => m.getMessage && m.getMessages);
 
 const debug = false;
 let lastFetch = 0;
+const fetchTime = 5000;
 const cachedMessages = new Map();
 
 // queue based on https://stackoverflow.com/questions/53540348/js-async-await-tasks-queue
@@ -19,7 +20,7 @@ const Queue = (() => {
     try {
       await pending;
     } finally {
-      if (lastFetch > Date.now() - 5000) await sleep(5000);
+      if (lastFetch > Date.now() - fetchTime) await sleep(fetchTime);
       try {
         const data = await get({
           url: Constants.Endpoints.MESSAGES(channelId),

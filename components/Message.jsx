@@ -67,10 +67,8 @@ export default memo(({ guildId, channelId, messageId, count }) => {
     };
 
     if (update) {
-      (async () => {
-        setMessage(await getMessage(channelId, messageId, update));
-        setUpdate(false);
-      })();
+      getMessage(channelId, messageId, update).then(setMessage);
+      setUpdate(false);
     }
 
     FluxDispatcher.subscribe(Constants.ActionTypes.MESSAGE_UPDATE, Update);
