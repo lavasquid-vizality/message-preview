@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { getModule } from '@vizality/webpack';
 import { sleep } from '@vizality/util/time';
 
@@ -49,7 +50,7 @@ export default async (channelId, messageId, updateMessage) => {
   const oldMap = cachedMessages.get(channelId);
   if (oldMap?.has(messageId) && updateMessage !== 'update') return cachedMessages.get(channelId).get(messageId);
 
-  const message = getMessage(channelId, messageId) ?? Queue(channelId, messageId);
+  const message = cloneDeep(getMessage(channelId, messageId)) ?? Queue(channelId, messageId);
 
   const newMap = oldMap ? [ ...oldMap, [ messageId, message ] ] : [ [ messageId, message ] ];
   cachedMessages.set(channelId, new Map(newMap));
